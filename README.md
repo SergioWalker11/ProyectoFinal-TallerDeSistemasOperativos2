@@ -50,25 +50,33 @@ bash
 ansible-playbook site.yml -i inventory.ini -v
 
 Verificación
+
 Servidor Web
 Accede desde un navegador a: http://IP_SERVIDOR
+
 Servidor de Archivos
 ⦁	Desde terminal: smbclient //IP_SERVIDOR/Proyectos -U devuser1
 ⦁	Desde gestor de archivos: smb://IP_SERVIDOR/Proyectos
 Credenciales por defecto:
 ⦁	Usuario: devuser1
 ⦁	Contraseña: Passw0rd
+
 Servicios Configurados
 Apache
+
 ⦁	Servicio activo y habilitado en el arranque
 ⦁	Página personalizada con variables Jinja2
 ⦁	Puerto 80 abierto en firewall
+
 Samba
+
 ⦁	Usuario devuser1 y grupo desarrolladores creados
 ⦁	Recurso compartido [Proyectos] en /srv/samba/proyectos
 ⦁	Acceso restringido solo al grupo desarrolladores
 ⦁	Puertos Samba abiertos en firewall
 Idempotencia
+
 El playbook es completamente idempotente - se puede ejecutar múltiples veces sin generar cambios innecesarios. Los servicios solo se reinician cuando sus archivos de configuración cambian.
 Autor
+
 Desarrollado como parte del desafío "Proyecto InnovaSys" - Configuración de servidor DevOps.
