@@ -1,0 +1,9 @@
+---
+- name: Configurar servidor InnovaSys
+  hosts: innovasys
+  become: yes
+  gather_facts: yes
+  
+  roles:
+    - apache
+    - samba

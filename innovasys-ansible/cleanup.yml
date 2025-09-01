@@ -1,0 +1,87 @@
+---
+- name: Limpiar configuración del servidor InnovaSys
+  hosts: innovasys
+  become: yes
+  gather_facts: no
+  
+  tasks:
+    - name: Detener servicios Apache y Samba
+      systemd:
+        name: "{{ item }}"
+        state: stopped
+        enabled: no
+      loop:
+        - apache2
+        - smbd
+        - nmbd
+      ignore_errors: yes
+
+    - name: Desinstalar Apache2
+      apt:
+        name:
+          - apache2
+          - apache2-common
+          - apache2-data
+          - apache2-utils
+        state: absent
+        purge: yes
+      ignore_errors: yes
+
+    - name: Desinstalar Samba
+      apt:
+        name:
+          - samba
+          - samba-common
+          - samba-common-bin
+        state: absent
+        purge: yes
+      ignore_errors: yes
+
+    - name: Limpiar paquetes no necesarios
+      apt:
+        autoremove: yes
+        autoclean: yes
+
+    - name: Eliminar directorio de Samba
+      file:
+        path: /srv/samba
+        state: absent
+
+    - name: Restaurar página por defecto de Apache
+      file:
+        path: /var/www/html/index.html
+        state: absent
+
+    - name: Eliminar usuario devuser1
+      user:
+        name: devuser1
+        state: absent
+        remove: yes
+      ignore_errors: yes
+
+    - name: Eliminar grupo desarrolladores
+      group:
+        name: desarrolladores
+        state: absent
+      ignore_errors: yes
+
+    - name: Resetear UFW
+      ufw:
+        state: reset
+      ignore_errors: yes
+
+    - name: Deshabilitar UFW
+      ufw:
+        state: disabled
+      ignore_errors: yes
+
+    - name: Eliminar directorios de configuración
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/apache2
+        - /etc/samba
+        - /var/log/apache2
+        - /var/log/samba
+      ignore_errors: yes

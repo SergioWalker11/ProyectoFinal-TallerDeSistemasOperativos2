@@ -1,0 +1,88 @@
+---
+- name: Instalar Samba
+  apt:
+    name: 
+      - samba
+      - samba-common-bin
+    state: present
+
+- name: Crear grupo desarrolladores
+  group:
+    name: "{{ samba_group }}"
+    state: present
+
+- name: Crear usuario devuser1
+  user:
+    name: "{{ samba_user }}"
+    group: "{{ samba_group }}"
+    shell: /usr/sbin/nologin
+    home: /nonexistent
+    create_home: no
+    system: yes
+    state: present
+
+- name: Crear directorio para compartir
+  file:
+    path: /srv/samba/proyectos
+    state: directory
+    owner: root
+    group: "{{ samba_group }}"
+    mode: '0775'
+    recurse: yes
+
+- name: Configurar Samba
+  template:
+    src: smb.conf.j2
+    dest: /etc/samba/smb.conf
+    backup: yes
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart smbd
+
+- name: Verificar si usuario existe en base de datos Samba
+  shell: pdbedit -L | grep "^{{ samba_user }}:"
+  register: samba_user_exists
+  failed_when: false
+  changed_when: false
+
+- name: Actualizar contraseña de Samba si usuario ya existe
+  shell: |
+    echo -e "{{ samba_password }}\n{{ samba_password }}" | smbpasswd -s {{ samba_user }}
+  when: samba_user_exists.rc == 0
+  no_log: true
+
+- name: Habilitar usuario en Samba
+  shell: smbpasswd -e {{ samba_user }}
+  changed_when: false
+  failed_when: false
+
+- name: Asegurar que smbd esté iniciado y habilitado
+  systemd:
+    name: smbd
+    state: started
+    enabled: yes
+
+- name: Asegurar que nmbd esté iniciado y habilitado
+  systemd:
+    name: nmbd
+    state: started
+    enabled: yes
+
+- name: Permitir tráfico Samba en firewall
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - '139'
+    - '445'
+
+- name: Permitir tráfico NetBIOS en firewall
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: udp
+  loop:
+    - '137'
+    - '138'

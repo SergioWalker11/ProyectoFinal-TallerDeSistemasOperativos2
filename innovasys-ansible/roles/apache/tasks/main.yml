@@ -1,0 +1,48 @@
+---
+- name: Actualizar cache de paquetes
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Instalar Apache2
+  apt:
+    name: apache2
+    state: present
+
+- name: Crear página personalizada desde plantilla
+  template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  notify: restart apache2
+
+- name: Asegurar que Apache2 esté iniciado y habilitado
+  systemd:
+    name: apache2
+    state: started
+    enabled: yes
+
+- name: Instalar UFW
+  apt:
+    name: ufw
+    state: present
+
+- name: Permitir SSH antes de habilitar UFW
+  ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+
+- name: Habilitar UFW con política por defecto
+  ufw:
+    state: enabled
+    policy: deny
+    direction: incoming
+
+- name: Permitir tráfico HTTP en firewall
+  ufw:
+    rule: allow
+    port: '80'
+    proto: tcp

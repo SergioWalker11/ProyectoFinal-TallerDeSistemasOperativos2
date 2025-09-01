@@ -1,0 +1,10 @@
+---
+- name: restart smbd
+  systemd:
+    name: smbd
+    state: restarted
+
+- name: restart nmbd
+  systemd:
+    name: nmbd
+    state: restarted
