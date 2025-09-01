@@ -11,17 +11,29 @@ Requisitos Previos
 Estructura del Proyecto
 
 innovasys-ansible/
+
 ├── site.yml                    # Playbook principal
+
 ├── inventory.ini               # Inventario de servidores
+
 └── roles/
+
 ├── apache/                 # Rol para servidor web
+
 │   ├── tasks/main.yml
+
 │   ├── templates/index.html.j2
+
 │   └── handlers/main.yml
+
 └── samba/                  # Rol para servidor de archivos
+
 ├── tasks/main.yml
+
 ├── templates/smb.conf.j2
+
 └── handlers/main.yml
+
 
 Configuración
 1. Configurar inventario
